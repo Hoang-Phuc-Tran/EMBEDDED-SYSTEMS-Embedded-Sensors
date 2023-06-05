@@ -103,7 +103,7 @@ ADD_CMD("a2demo", _pt_A2,"Toggles all 8 LEDs using a loop (default value: count:
 int ptGame_A3(int delay, char *pattern, int target);
 
 /*
-* Function: _pt_A2
+* Function: ptGame
 * Description: Two integers from the user are required for this function. The first number 
 toggles the 8-led cycle, while the second number changes the busy_delay function's delay
  between LEDs in accordance with the user-passed delay.
@@ -153,3 +153,61 @@ void ptGame(int action)
 
 ADD_CMD("ptGame", ptGame,"<delay><patter><target>")
 
+/*********************************************************************************************/
+/*********************************************************************************************/
+/****************************** Assignment 4 *************************************************/
+/*********************************************************************************************/
+/*********************************************************************************************/
+
+// Function declaration
+int ptTilt_A4(int delay, int taget, int game_time);
+
+/*
+* Function: Titl
+* Description: Three integers from the user are required for this function. The first number 
+is the delay, the second number is the target LED, and the third one is the time of the game.
+* Parameters: an integer - int action
+* Returns: void
+*/
+void ptTilt(int action)
+{
+    if(action==CMD_SHORT_HELP) return;
+    if(action==CMD_LONG_HELP) {
+        printf("Addition Test\n\n"
+        "This command tests new addition function\n"
+    );
+    return;
+    }
+
+    // delay input
+    uint32_t delay;
+    int fetch_status;
+    fetch_status = fetch_uint32_arg(&delay);
+    if(fetch_status) {
+    // Use a default delay value
+    delay = 500;
+    }
+
+    // target input
+    uint32_t target;
+    int fetch_status1;
+    fetch_status1 = fetch_uint32_arg(&target);
+    if(fetch_status1) {
+    // Default logic here
+    target = 1;
+    }
+
+    // time input
+    uint32_t time;
+    int fetch_status2;  
+    fetch_status2 = fetch_uint32_arg(&time);
+    // check the target variable is valid or not
+    if(fetch_status2) {
+    // Use a default target value
+    time = 15;
+    }
+    
+    printf("add_test returned: %d\n", ptTilt_A4(delay, target, time));
+}
+
+ADD_CMD("ptTilt", ptTilt,"<delay><target><time_game>")
