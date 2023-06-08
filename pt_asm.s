@@ -315,19 +315,23 @@ exit_loop:
      TICK_A4: .word 0
     .text
 
+@ Function Declaration : int ptTilt_A4(int delay, int target, int time_game)
+@
+@ Input: r0, r1 (i.e. r0 holds delay, r1 holds target, r2 holds time_game)
+@ Returns: r0
 ptTilt_A4:
-    push {r4, r5, r6, lr}
+    push {r4, r5, r6, lr}           
 
-    ldr r4, =DELAY_A4
-    str r0, [r4]
+    ldr r4, =DELAY_A4               @ load the address of DELAY_A4 to r4
+    str r0, [r4]                    @ store the delay value at the address of DELAY_A4
 
-    ldr r5, =TARGET_A4
-    str r1, [r5]
+    ldr r5, =TARGET_A4              @ load the address of TARGET_A4 to r5
+    str r1, [r5]                    @ store the delay value at the address of TARGET_A4
 
-    ldr r6, =GAME_TIME
-    mov r3, #1000
-    mul r2,r2, r3
-    str r2, [r6]
+    ldr r6, =GAME_TIME              @ load the address of GAME_TIME to r6
+    mov r3, #1000                   @ load the value 1000 in r3
+    mul r2,r2, r3                   @ multiply it with GAME_TIME to convert in second
+    str r2, [r6]                    @ store the delay value at the address of GAME_TIME
 
     pop {r4, r5, r6, lr}
     bx lr
@@ -335,7 +339,71 @@ ptTilt_A4:
 
 
 
+@ Assembly file ended by single .end directive on its own line
+    .code 16 @ This directive selects the instruction set being generated.
 
+@ The value 16 selects Thumb, with the value 32 selecting ARM.
+    .text @ Tell the assembler that the upcoming section is to be considered
+
+@ assembly language instructions - Code section (text -> ROM)
+@@ Function Header Block
+    .align 2 @ Code alignment - 2^n alignment (n=2)
+
+@ This causes the assembler to use 4 byte alignment
+    .syntax unified @ Sets the instruction set to the new unified ARM + THUMB
+
+@ instructions. The default is divided (separate instruction sets)
+    .global pt_A4
+
+    .code 16 @ 16bit THUMB code (BOTH .code and .thumb_func are required)
+    .thumb_func @ Specifies that the following symbol is the name of a THUMB
+
+@ encoded function. Necessary for interlinking between ARM and THUMB code.
+    .type pt_A4, %function @ Declares that the symbol is a function (not strictly required)
+    @ Actual declaration of the symbol
+    @ Data section - initialized values
+
+@ define magic numbers
+.equ I2C_Address, 0x32
+.equ X_HI, 0x29
+.equ Y_HI, 0x2B
+.equ X_LO, 0x28
+.equ Y_LO, 0x2A
+.equ DELAYY, 500
+
+@ Function Declaration : int ptTilt_A4(int delay, int target, int time_game)
+@
+@ Input: r0, r1 (i.e. r0 holds delay, r1 holds target, r2 holds time_game)
+@ Returns: r0
+pt_A4:
+    push {r4 - r10, lr}
+    mov r7, #8
+
+    ldr r4, =GAME_TIME
+    ldr r0, [r4]
+    subs r0, r0, #1
+
+    @if ticks hit zero, stop doing things
+    ble exit_loop_a4
+
+    str r0, [r4]
+
+    ldr r1, =TICK_A4
+    ldr r0, [r1]
+    subs r0,r0, #1
+
+    str r0, [r1]
+    bgt exit_loop_a41
+
+    mov r9, #7
+    bl turn_off_LEDs
+    
+    mov r0, #I2C_Address
+    mov r1, #Y_HI
+    bl COMPASSACCELERO_IO_Read
+    mov r5, r0
+
+    
 
     .size add_test, .-add_test @@ - symbol size (not strictly required, but makes the debugger happy)
 
