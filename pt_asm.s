@@ -371,39 +371,82 @@ ptTilt_A4:
 .equ Y_LO, 0x2A
 .equ DELAYY, 500
 
-@ Function Declaration : int ptTilt_A4(int delay, int target, int time_game)
-@
-@ Input: r0, r1 (i.e. r0 holds delay, r1 holds target, r2 holds time_game)
-@ Returns: r0
+@ This function is called from main.c to run the game
 pt_A4:
     push {r4 - r10, lr}
-    mov r7, #8
 
-    ldr r4, =GAME_TIME
-    ldr r0, [r4]
-    subs r0, r0, #1
+    mov r7, #8                  @ move the value 8 in r7 (This is the index of LEDs)
 
-    @if ticks hit zero, stop doing things
-    ble exit_loop_a4
+    ldr r4, =GAME_TIME          @ Load the address of GAME_TIME to r4
+    ldr r0, [r4]                @ Get the value at the address in r4
+    subs r0, r0, #1             @ we subtract to 1 (This is the real time of the game)
 
-    str r0, [r4]
+    ble game_end                @ if ticks hit zero, stop the game
+    str r0, [r4]                @ store the value back to GAME_TIME 
 
-    ldr r1, =TICK_A4
-    ldr r0, [r1]
-    subs r0,r0, #1
+    ldr r1, =TICK_A4            @ load the address of TICK_A4
+    ldr r0, [r1]                @ Get the value at the address of TICK_A4
+    subs r0,r0, #1               @ we subtract to 1
 
-    str r0, [r1]
-    bgt exit_loop_a41
+    str r0, [r1]                 @ store the value back to GAME_TIME 
+    bgt exit_loop_               @ if > 10, we exit the loop
 
-    mov r9, #7
+    mov r9, #7                  @ we put the value 7 to r9 this is the index of LEDS
     bl turn_off_LEDs
     
-    mov r0, #I2C_Address
+    mov r0, #I2C_Address        
     mov r1, #Y_HI
     bl COMPASSACCELERO_IO_Read
-    mov r5, r0
+    mov r5, r0                      
 
+    loop_modulo_start:
+    CMP   R5, R7        @ Compare R4 with R5
+    BLT   modulo_end    @ If R4 < R5, jump to modulo_end
+
+    SUBS  R5, R5, R7    @ Subtract R5 from R4 and store it to r5 (this value we will use it to turn on the LED)
+    B     loop_modulo_start  @ branch to loop_modulo_start
     
+
+    modulo_end:
+    mov r10, r5          @ copy the value r5 to r10
+    mov r0, r10          @ copy the value of r5 to r0 to turn on the LED
+    bl BSP_LED_Toggle    @ call the BSP_LED_Toggle subroutine
+
+
+    ldr r2, =TARGET_A4   @ load the address of TARGET_A4
+    ldr r0, [r2]         @ Get the value at the address of TARGET_A4
+    cmp r5, r0           @ Compare the Target LED with current LED
+    beq user_win_a4      @ If it's equal, we exit the game
+
+
+    ldr r1, =TICK_A4     @ We reset the TICK_A4
+    mov r0, #500         @ set the value 500 to r0
+    str r0, [r1]         @ store the value back to TICK_A4
+    
+   @ This is used to exit the loop ticks
+   exit_loop_:
+   pop {r4 - r10, lr}
+   bx lr
+
+    @ this is used when the program reaches the time game
+    game_end:
+    mov r9, #7          @ move the value 7 to r9
+    bl turn_off_LEDs    @ call turn_off_LEDs subroutine
+    ldr r2, =TARGET_A4  @ @ load the address of TARGET_A4
+    ldr r0, [r2]        @ Get the value at the address of TARGET_A4
+    bl BSP_LED_Toggle   @call BSP_LED_Toggle subroutine
+    pop {r4 - r10, lr}
+    bx lr
+
+
+@ This subroutine is used when user wins the game
+@ It will toggle all LEDs twice
+user_win_a4:
+    mov r0, #0          @ we put the value 0 to r0
+    ldr r4, =GAME_TIME  @  load the address of GAME_TIME
+    str r0, [r4]        @ Set the time game to zero when user win
+
+    b exit_loop_        @ Exit the game
 
     .size add_test, .-add_test @@ - symbol size (not strictly required, but makes the debugger happy)
 
