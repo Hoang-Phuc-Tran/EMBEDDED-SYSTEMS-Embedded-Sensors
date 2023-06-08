@@ -308,28 +308,33 @@ exit_loop:
     .type ptTilt_A4, %function @ Declares that the symbol is a function (not strictly required)
     @ Actual declaration of the symbol
     @ Data section - initialized values
+     .data
+     DELAY_A4: .word 0
+     TARGET_A4: .word 0
+     GAME_TIME: .word 0
+     TICK_A4: .word 0
+    .text
 
-@ define magic numbers
-.equ I2C_Address, 0x32
-.equ X_HI, 0x29
-.equ Y_HI, 0x2B
-
-@ Function Declaration : int ptTilt_A4(int delay, int target, int time_game)
-@
-@ Input: r0, r1 (i.e. r0 holds delay, r1 holds target, r2 holds time_game)
-@ Returns: r0
 ptTilt_A4:
-    push {r4 - r10, lr}
-    
-    mov r0, #I2C_Address
-    mov r1, #X_HI
-    bl COMPASSACCELERO_IO_Read
+    push {r4, r5, r6, lr}
 
-    sxtb r0, r0
+    ldr r4, =DELAY_A4
+    str r0, [r4]
 
+    ldr r5, =TARGET_A4
+    str r1, [r5]
 
-    pop {r4 - r10, lr}
+    ldr r6, =GAME_TIME
+    mov r3, #1000
+    mul r2,r2, r3
+    str r2, [r6]
+
+    pop {r4, r5, r6, lr}
     bx lr
+
+
+
+
 
 
     .size add_test, .-add_test @@ - symbol size (not strictly required, but makes the debugger happy)

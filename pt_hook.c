@@ -204,10 +204,14 @@ void ptTilt(int action)
     // check the target variable is valid or not
     if(fetch_status2) {
     // Use a default target value
-    time = 15;
+    time = 10;
     }
     
+   
     printf("add_test returned: %d\n", ptTilt_A4(delay, target, time));
+    
 }
 
 ADD_CMD("ptTilt", ptTilt,"<delay><target><time_game>")
+
+
