@@ -18,7 +18,7 @@ For instance, consider the command: ptGame 500 5 30
 
 This configuration would run the game, aiming to keep light 5 on for 500ms to achieve victory. The game will run for 30 seconds, and if you don't manage to achieve the goal within that time, it will end in a loss.
 
-## Note: This project is not completed. 
+## Note: This project is not completed!
 
 
 
