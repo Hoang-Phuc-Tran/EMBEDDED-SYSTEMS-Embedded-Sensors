@@ -3,7 +3,7 @@
 Welcome to the STM32 Accelerometer Game Project! This repository introduces an exciting new game that takes advantage of the lights and accelerometer features on the STM32 board.
 
 ## Quick Overview
-
+ 
 Embark on a thrilling adventure with our new accelerometer-based game. You'll have the opportunity to control the lights on the STM32 board using the accelerometer's X and Y values via the I2C interface.
 
 ## How It Works
